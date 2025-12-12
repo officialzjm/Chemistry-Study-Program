@@ -30,39 +30,61 @@ class QuizApp extends StatefulWidget {
 }
 
 class _QuizAppState extends State<QuizApp> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
+    int questionsUnknown = 0;
+    int questionsRemaining = 0;
+    int questionsFinished = 0;
+    int currentQuestionIndex = 1;
+    const List<String> questions =  [];
+    const List<String> answers =  [];
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: const Text('Quiz Program'),
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Question Display Area
+            Expanded(
+              child: Center(
+                child: Text(
+                  questions[currentQuestionIndex],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+
+            // Answer Buttons Area
+            ...(answers[currentQuestionIndex]).map((answer) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: ElevatedButton(
+                  onPressed: () => 1,//=> answerQuestion(answer),
+                  child: Text(answer),
+                ),
+              );
+            }).toList(),
+
+            const SizedBox(height: 20),
+
+            // Stats and Navigation Bar
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Unknown: $questionsUnknown', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text('Remaining: $questionsRemaining', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text('Finished: $questionsFinished', style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
