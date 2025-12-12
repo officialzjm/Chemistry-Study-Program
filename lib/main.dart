@@ -30,7 +30,7 @@ class QuizApp extends StatefulWidget {
 }
 
 class _QuizAppState extends State<QuizApp> {
-  int _counter = 0;
+  int _counter = 20;
 
   void _incrementCounter() {
     setState(() {
