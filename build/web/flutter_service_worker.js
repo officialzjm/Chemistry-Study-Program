@@ -28,10 +28,10 @@ const RESOURCES = {"assets/shaders/stretch_effect.frag": "40d68efbbf360632f614c7
 "canvaskit/canvaskit.wasm": "9b6a7830bf26959b200594729d73538e",
 "canvaskit/skwasm_heavy.js": "740d43a6b8240ef9e23eed8c48840da4",
 "canvaskit/skwasm.js": "8060d46e9a4901ca9991edd3a26be4f0",
-"index.html": "a221b78c951e715447d1d25edef3610b",
-"/": "a221b78c951e715447d1d25edef3610b",
+"index.html": "25d66fce0a2598fbd3f599ac1e806cd1",
+"/": "25d66fce0a2598fbd3f599ac1e806cd1",
 "main.dart.js": "0bbf97189ed855dc66336b77c7665639",
-"flutter_bootstrap.js": "e169d9f34a5e63bc06d71cde8ce0f873",
+"flutter_bootstrap.js": "3aece248627bf12c634510fe09dc62a1",
 "version.json": "322dfa94430cc69aa45ce83495f46466",
 "manifest.json": "8e66e1314dbabf0aa13062137d7bf013",
 "flutter.js": "24bc71911b75b5f8135c949e27a2984e"};
