@@ -29,10 +29,10 @@ const RESOURCES = {"assets/assets/questions.json": "06788ca363c47cb77edff4cdb9d5
 "canvaskit/canvaskit.wasm": "9b6a7830bf26959b200594729d73538e",
 "canvaskit/skwasm_heavy.js": "740d43a6b8240ef9e23eed8c48840da4",
 "canvaskit/skwasm.js": "8060d46e9a4901ca9991edd3a26be4f0",
-"index.html": "046871af4d922c380dd7e66d1530275d",
-"/": "046871af4d922c380dd7e66d1530275d",
+"index.html": "99fd9ee271ff6509715ec968f4abcb02",
+"/": "99fd9ee271ff6509715ec968f4abcb02",
 "main.dart.js": "81dd98911420e9d5f6710f804b8facd2",
-"flutter_bootstrap.js": "7c009db1760d6dc2480bf502f2b91956",
+"flutter_bootstrap.js": "e21b9b55a692821998d072217551668b",
 "version.json": "322dfa94430cc69aa45ce83495f46466",
 "manifest.json": "8e66e1314dbabf0aa13062137d7bf013",
 "flutter.js": "24bc71911b75b5f8135c949e27a2984e"};
