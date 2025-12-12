@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const MyApp());
@@ -7,15 +12,24 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      title: 'Chemistry Study Program',
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Colors.grey[900],
+        primaryColor: Colors.blueGrey,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.black,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blueGrey,
+            foregroundColor: Colors.white,
+          ),
+        ),
       ),
-      home: const QuizApp(title: 'Flutter Demo Home Page'),
+      home: const QuizApp(title: 'Quiz Program'),
     );
   }
 }
@@ -28,58 +42,186 @@ class QuizApp extends StatefulWidget {
   @override
   State<QuizApp> createState() => _QuizAppState();
 }
+class Question {
+  final String type; // "tf" or "mc"
+  final String text;
+  final List<String> answers;
+  final int correctIndex;
+
+  Question({
+    required this.type,
+    required this.text,
+    required this.answers,
+    required this.correctIndex,
+  });
+
+  factory Question.fromJson(Map<String, dynamic> json) {
+    return Question(
+      type: json["type"],
+      text: json["text"],
+      answers: List<String>.from(json["answers"]),
+      correctIndex: json["correctIndex"],
+    );
+  }
+}
+
 
 class _QuizAppState extends State<QuizApp> {
+  
+  List<Question> questions = [];
+  List<int> questionsUnknown = [];
+  List<int> questionsToReview = [];
+  List<int> questionsFinished = [];
+  int currentQuestionIndex = 0;
+
+  Map<int, Color> answerButtonColors = {};
+  bool answered = false;
+  int? selectedAnswerIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    loadQuestions();
+  }
+
+  Future<void> loadQuestions() async {
+    
+    final String data = await rootBundle.loadString('assets/questions.json');
+    final List<dynamic> jsonResult = jsonDecode(data);
+    setState(() {
+      questions = jsonResult.map((q) => Question.fromJson(q)).toList();
+      questionsUnknown = List.generate(questions.length, (i) => i);
+      questionsToReview = [];
+      questionsFinished = [];
+    });
+  }
+
+  void nextQuestion() {
+    answered = false;
+    selectedAnswerIndex = null;
+
+    if (questionsUnknown.isNotEmpty) {
+      currentQuestionIndex = questionsUnknown[Random().nextInt(questionsUnknown.length)];
+      questionsUnknown.remove(currentQuestionIndex); //later set to not remove until after answered
+    } else if (questionsToReview.isNotEmpty) {
+      currentQuestionIndex = questionsToReview[Random().nextInt(questionsToReview.length)];
+      questionsToReview.remove(currentQuestionIndex);
+    } else {
+      currentQuestionIndex = -1;
+    }
+
+    setState(() {});
+  }
+
+
+  void answerQuestion(int passedAnswerIndex) { //function kept and not integrated incase of future use
+    answered = true;
+    selectedAnswerIndex = passedAnswerIndex;
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
-    int questionsUnknown = 0;
-    int questionsRemaining = 0;
-    int questionsFinished = 0;
-    int currentQuestionIndex = 1;
-    const List<String> questions =  [];
-    const List<String> answers =  [];
+    //quiz complete check
+    if (currentQuestionIndex == -1 || questions.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Chemistry Quiz Program')),
+        body: const Center(
+          child: Text(
+            'Quiz Complete!',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+    //end check
 
-    return Scaffold(
+    return Scaffold( 
       appBar: AppBar(
-        title: const Text('Quiz Program'),
+        title: const Text('Chemistry Quiz Program'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, 
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Question Display Area
-            Expanded(
-              child: Center(
-                child: Text(
-                  questions[currentQuestionIndex],
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Text(
+                    questions[currentQuestionIndex].text,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Roboto',
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 16),
+
+                ...(questions[currentQuestionIndex].answers).asMap().entries.map((entry) {
+                  int index = entry.key;
+                  String answer = entry.value;
+
+                  Color buttonColor = Colors.blueGrey; // default
+
+                  if (answered) {
+                    if (index == selectedAnswerIndex) {
+                      buttonColor = (index == questions[currentQuestionIndex].correctIndex)
+                          ? Colors.green
+                          : Colors.red;
+                    } else if (index == questions[currentQuestionIndex].correctIndex) {
+                      buttonColor = Colors.green;
+                    }
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: buttonColor),
+                      onPressed: answered
+                          ? null
+                          : () => answerQuestion(index),
+                      child: Text(answer),
+                    ),
+                  );
+                }).toList(),
+
+                if (answered)
+                  Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          questionsFinished.add(currentQuestionIndex);
+                          nextQuestion();
+                        },
+                        child: const Text("Finish"),
+                      ),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          questionsToReview.add(currentQuestionIndex);
+                          nextQuestion();
+                        },
+                        child: const Text("To Review"),
+                      ),
+                    ],
+                  ),
+              ],
             ),
 
-            // Answer Buttons Area
-            ...(answers[currentQuestionIndex]).map((answer) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: ElevatedButton(
-                  onPressed: () => 1,//=> answerQuestion(answer),
-                  child: Text(answer),
-                ),
-              );
-            }).toList(),
-
-            const SizedBox(height: 20),
-
-            // Stats and Navigation Bar
+            // Bottom Stats Row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Unknown: $questionsUnknown', style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text('Remaining: $questionsRemaining', style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text('Finished: $questionsFinished', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text('Unknown: ${questionsUnknown.length}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text('To Review: ${questionsToReview.length}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text('Finished: ${questionsFinished.length}', style: const TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
           ],
@@ -88,3 +230,9 @@ class _QuizAppState extends State<QuizApp> {
     );
   }
 }
+/*
+style: GoogleFonts.lato(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+  ),
+  */
