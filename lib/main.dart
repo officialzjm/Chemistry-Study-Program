@@ -102,10 +102,8 @@ class _QuizAppState extends State<QuizApp> {
 
     if (questionsUnknown.isNotEmpty) {
       currentQuestionIndex = questionsUnknown[Random().nextInt(questionsUnknown.length)];
-      questionsUnknown.remove(currentQuestionIndex); //later set to not remove until after answered
     } else if (questionsToReview.isNotEmpty) {
       currentQuestionIndex = questionsToReview[Random().nextInt(questionsToReview.length)];
-      questionsToReview.remove(currentQuestionIndex);
     } else {
       currentQuestionIndex = -1;
     }
@@ -140,6 +138,7 @@ class _QuizAppState extends State<QuizApp> {
     return Scaffold( 
       appBar: AppBar(
         title: const Text('Chemistry Quiz Program'),
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -181,12 +180,19 @@ class _QuizAppState extends State<QuizApp> {
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: buttonColor),
-                      onPressed: answered
-                          ? null
-                          : () => answerQuestion(index),
-                      child: Text(answer),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 400),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: buttonColor,
+                          ),
+                          onPressed: () {
+                            if (!answered) answerQuestion(index);
+                          },
+                          child: Text(answer),
+                        ),
+                      ),
                     ),
                   );
                 }).toList(),
@@ -197,6 +203,8 @@ class _QuizAppState extends State<QuizApp> {
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () {
+                          if (questionsUnknown.contains(currentQuestionIndex)) questionsUnknown.remove(currentQuestionIndex);
+                          if (questionsToReview.contains(currentQuestionIndex)) questionsToReview.remove(currentQuestionIndex);
                           questionsFinished.add(currentQuestionIndex);
                           nextQuestion();
                         },
@@ -205,6 +213,7 @@ class _QuizAppState extends State<QuizApp> {
                       const SizedBox(height: 8),
                       ElevatedButton(
                         onPressed: () {
+                          if (questionsUnknown.contains(currentQuestionIndex)) questionsUnknown.remove(currentQuestionIndex);
                           questionsToReview.add(currentQuestionIndex);
                           nextQuestion();
                         },
@@ -216,13 +225,17 @@ class _QuizAppState extends State<QuizApp> {
             ),
 
             // Bottom Stats Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Unknown: ${questionsUnknown.length}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text('To Review: ${questionsToReview.length}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text('Finished: ${questionsFinished.length}', style: const TextStyle(fontWeight: FontWeight.bold)),
-              ],
+            Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Unknown: ${questionsUnknown.length}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 24),
+                  Text('To Review: ${questionsToReview.length}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 24),
+                  Text('Finished: ${questionsFinished.length}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
             ),
           ],
         ),
